@@ -103,9 +103,10 @@ This project includes a Prisma schema at `prisma/schema.prisma`. Key points from
     - Note: set `DATABASE_URL` in your `.env` (Prisma will use this to connect).
 
 - **Models** (main entities):
-    - `User` — fields: `id`, `name`, `email` (unique), `password`, optional contact/address fields, timestamps. Mapped to DB table `users`.
+    - `User` — fields: `id`, `name`, `email` (unique), `userType` (enum), `password`, optional contact/address fields, timestamps. Mapped to DB table `users`.
     - `Product` — fields: `id`, `title`, `description`, `type` (enum), `gender` (enum), `brand` (default `Black Pearl`), timestamps. Mapped to `products`.
-    - `ProductVariant` — variant of a product: `productId` relation, `size` (enum), `color` (enum), `sku` (unique), `price`, timestamps. Mapped to `product_variants`.
+    - `ProductVariant` — variant of a product: `productId` relation, `size` (enum), `color` (enum), `sku` (unique), `price`, an `images` relation to `ProductVariantImage`, optional `inventory`, and timestamps. Mapped to `product_variants`.
+    - `ProductVariantImage` — stores image URLs for a `ProductVariant`: `id`, `url`, `isPrimary` (boolean), optional `sortOrder`, `productVariantId` relation, and timestamps. Mapped to `product_variant_images`.
     - `Order` — belongs to `User`, links to a `ProductVariant`, has `status` (enum) defaulting to `pending`, timestamps. Mapped to `orders`.
     - `OrderItem` — belongs to `Order`, references `ProductVariant`, `quantity`, `price`, timestamps. Mapped to `order_items`.
     - `Inventory` — one-to-one with `ProductVariant` (`productVariantId` is `@unique`), `quantity`, timestamps. Mapped to `inventory`.
@@ -116,6 +117,8 @@ This project includes a Prisma schema at `prisma/schema.prisma`. Key points from
     - `ProductVariantSizes`: `S`, `M`, `L`, `XL`, `XXL`
     - `ProductVariantColors`: `black`, `blue`, `darkBlue`, `lightBlue`
     - `OrderStatus`: `pending`, `paid`, `shipped`, `delivered`, `cancelled`
+
+    - `UserTypes`: `buyer`, `seller`
 
 These models include relations (foreign keys) and mapping to specific table names using `@@map`.
 

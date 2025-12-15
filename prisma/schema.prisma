@@ -18,12 +18,14 @@ model User {
   id           Int       @id @default(autoincrement())
   name         String
   email        String    @unique
+  userType     UserTypes
   password     String
   phoneNumber  String?
   houseNumber  String?
   streetNumber String?
   town         String?
   city         String?
+  orders       Order[]
   country      String?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
@@ -36,6 +38,7 @@ model Product {
   title       String
   description String       
   type        ProductTypes
+  variants    ProductVariant[]
   gender      ProductGender
   brand       String        @default("Black Pearl")
   createdAt   DateTime      @default(now())
@@ -50,6 +53,9 @@ model ProductVariant {
   productId        Int
   size             ProductVariantSizes
   color            ProductVariantColors
+  orderItems       OrderItem[]
+  images           ProductVariantImage[]
+  inventory        Inventory?
   sku              String            @unique
   price            Int
   createdAt        DateTime          @default(now())
@@ -58,13 +64,23 @@ model ProductVariant {
   @@map("product_variants")
 }
 
+model ProductVariantImage {
+  id                Int @id @default(autoincrement())
+  url               String
+  isPrimary         Boolean @default(false)
+  sortOrder         Int?
+  productVariantId   Int
+  productVariant    ProductVariant @relation(fields: [productVariantId], references: [id])
+  createdAt         DateTime @default(now())
+  @@map("product_variant_images")
+}
+
 model Order {
   id                Int             @id @default(autoincrement())
   user              User            @relation(fields: [userId], references: [id])
   userId            Int
-  productVariant    ProductVariant  @relation(fields: [productVariantId], references: [id])
-  productVariantId  Int
   status            OrderStatus     @default(pending)
+  orderItems        OrderItem[]
   createdAt         DateTime        @default(now())
   updatedAt         DateTime        @updatedAt
 
@@ -128,4 +144,9 @@ enum OrderStatus {
   shipped
   delivered
   cancelled
+}
+
+enum UserTypes {
+  buyer
+  seller
 }
