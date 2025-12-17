@@ -9,7 +9,58 @@
 * 🟢 You can import this file directly.
 */
 
+export const ProductGender = {
+  men: 'men',
+  women: 'women',
+  unisex: 'unisex'
+} as const
+
+export type ProductGender = (typeof ProductGender)[keyof typeof ProductGender]
 
 
-// This file is empty because there are no enums in the schema.
-export {}
+export const ProductTypes = {
+  jeans: 'jeans',
+  shorts: 'shorts'
+} as const
+
+export type ProductTypes = (typeof ProductTypes)[keyof typeof ProductTypes]
+
+
+export const ProductVariantSizes = {
+  S: 'S',
+  M: 'M',
+  L: 'L',
+  XL: 'XL',
+  XXL: 'XXL'
+} as const
+
+export type ProductVariantSizes = (typeof ProductVariantSizes)[keyof typeof ProductVariantSizes]
+
+
+export const ProductVariantColors = {
+  black: 'black',
+  blue: 'blue',
+  darkBlue: 'darkBlue',
+  lightBlue: 'lightBlue'
+} as const
+
+export type ProductVariantColors = (typeof ProductVariantColors)[keyof typeof ProductVariantColors]
+
+
+export const OrderStatus = {
+  pending: 'pending',
+  paid: 'paid',
+  shipped: 'shipped',
+  delivered: 'delivered',
+  cancelled: 'cancelled'
+} as const
+
+export type OrderStatus = (typeof OrderStatus)[keyof typeof OrderStatus]
+
+
+export const UserTypes = {
+  buyer: 'buyer',
+  seller: 'seller'
+} as const
+
+export type UserTypes = (typeof UserTypes)[keyof typeof UserTypes]
