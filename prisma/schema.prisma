@@ -16,9 +16,9 @@ datasource db {
 }
 model User {
   id           Int       @id @default(autoincrement())
-  name         String
+  name         String?
   email        String    @unique
-  userType     UserTypes
+  userType     UserTypes @default(BUYER)
   password     String
   phoneNumber  String?
   houseNumber  String?
@@ -147,6 +147,6 @@ enum OrderStatus {
 }
 
 enum UserTypes {
-  buyer
-  seller
+  BUYER
+  SELLER
 }

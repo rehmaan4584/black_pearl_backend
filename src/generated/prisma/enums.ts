@@ -59,8 +59,8 @@ export type OrderStatus = (typeof OrderStatus)[keyof typeof OrderStatus]
 
 
 export const UserTypes = {
-  buyer: 'buyer',
-  seller: 'seller'
+  BUYER: 'BUYER',
+  SELLER: 'SELLER'
 } as const
 
 export type UserTypes = (typeof UserTypes)[keyof typeof UserTypes]
