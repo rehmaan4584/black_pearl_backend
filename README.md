@@ -162,6 +162,15 @@ npx prisma generate
 - **typescript** (^5.7.3) - TypeScript compiler
 - **ts-node** (^10.9.2) - TypeScript execution for Node.js
 
+## Authentication
+
+- **Module**: `src/auth` — provides registration, login and protected endpoints using Passport + NestJS.
+- **Strategies**: `LocalStrategy` (`src/auth/strategy/auth-local.strategy.ts`) for username/email+password login (uses `passport-local`), and `JwtStrategy` (`src/auth/strategy/jwt-auth.strategy.ts`) for bearer token validation (uses `passport-jwt`).
+- **Guards**: `LocalAuthGuard` (`src/auth/guards/local-auth.guard.ts`) wraps the local strategy; `JwtAuthGuard` (`src/auth/guards/jwt-auth.guard.ts`) wraps the JWT strategy; `RolesGuard` (`src/auth/guards/roles.guard.ts`) enforces role-based access using metadata from the `@Roles()` decorator.
+- **Decorator**: `@Roles(...)` (`src/auth/decorators/roles.decorator.ts`) sets required roles on controllers/handlers using the `ROLES_KEY` metadata key.
+- **Usage**: login route uses `@UseGuards(LocalAuthGuard)` (see `POST /auth/login`) which delegates to `AuthService.validate`. Protected routes combine `@UseGuards(JwtAuthGuard, RolesGuard)` and `@Roles('SELLER')` (e.g. `GET /auth/me`) to require a valid JWT and a specific role.
+- **JWT config**: the module registers `JwtModule` with `secret: 'my_secret'` and `expiresIn: '1h'` in `src/auth/auth.module.ts`. For production, move the secret and options into environment variables.
+
 ## Available Scripts
 
 ```bash
