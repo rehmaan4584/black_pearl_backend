@@ -5,6 +5,7 @@ import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import configuration from './config/app.config';
 import { configValidationSchema } from './config/app.config.schema';
+import { ProductsModule } from './products/products.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { configValidationSchema } from './config/app.config.schema';
     }),
     AuthModule,
     UserModule,
+    ProductsModule,
   ],
   controllers: [],
   providers: [PrismaService],

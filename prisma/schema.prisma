@@ -79,7 +79,7 @@ model Order {
   id                Int             @id @default(autoincrement())
   user              User            @relation(fields: [userId], references: [id])
   userId            Int
-  status            OrderStatus     @default(pending)
+  status            OrderStatus     @default(PENDING)
   orderItems        OrderItem[]
   createdAt         DateTime        @default(now())
   updatedAt         DateTime        @updatedAt
@@ -112,15 +112,18 @@ model Inventory {
   @@map("inventory")
 }
 
+
 enum ProductGender {
-  men
-  women
-  unisex
+  MEN
+  WOMEN
+  UNISEX
 }
 
 enum ProductTypes {
-  jeans
-  shorts
+  JEANS
+  SHORTS
+  SHIRTS
+  KNICKERS
 }
 
 enum ProductVariantSizes {
@@ -132,18 +135,18 @@ enum ProductVariantSizes {
 }
 
 enum ProductVariantColors {
-  black
-  blue
-  darkBlue
-  lightBlue
+  BLACK
+  BLUE
+  DARK_BLUE
+  LIGHT_BLUE
 }
 
 enum OrderStatus {
-  pending
-  paid
-  shipped
-  delivered
-  cancelled
+  PENDING
+  PAID
+  SHIPPED
+  DELIVERED
+  CANCELLED
 }
 
 enum UserTypes {

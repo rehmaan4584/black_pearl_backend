@@ -10,17 +10,19 @@
 */
 
 export const ProductGender = {
-  men: 'men',
-  women: 'women',
-  unisex: 'unisex'
+  MEN: 'MEN',
+  WOMEN: 'WOMEN',
+  UNISEX: 'UNISEX'
 } as const
 
 export type ProductGender = (typeof ProductGender)[keyof typeof ProductGender]
 
 
 export const ProductTypes = {
-  jeans: 'jeans',
-  shorts: 'shorts'
+  JEANS: 'JEANS',
+  SHORTS: 'SHORTS',
+  SHIRTS: 'SHIRTS',
+  KNICKERS: 'KNICKERS'
 } as const
 
 export type ProductTypes = (typeof ProductTypes)[keyof typeof ProductTypes]
@@ -38,21 +40,21 @@ export type ProductVariantSizes = (typeof ProductVariantSizes)[keyof typeof Prod
 
 
 export const ProductVariantColors = {
-  black: 'black',
-  blue: 'blue',
-  darkBlue: 'darkBlue',
-  lightBlue: 'lightBlue'
+  BLACK: 'BLACK',
+  BLUE: 'BLUE',
+  DARK_BLUE: 'DARK_BLUE',
+  LIGHT_BLUE: 'LIGHT_BLUE'
 } as const
 
 export type ProductVariantColors = (typeof ProductVariantColors)[keyof typeof ProductVariantColors]
 
 
 export const OrderStatus = {
-  pending: 'pending',
-  paid: 'paid',
-  shipped: 'shipped',
-  delivered: 'delivered',
-  cancelled: 'cancelled'
+  PENDING: 'PENDING',
+  PAID: 'PAID',
+  SHIPPED: 'SHIPPED',
+  DELIVERED: 'DELIVERED',
+  CANCELLED: 'CANCELLED'
 } as const
 
 export type OrderStatus = (typeof OrderStatus)[keyof typeof OrderStatus]
