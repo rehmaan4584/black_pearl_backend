@@ -65,13 +65,15 @@ model ProductVariant {
 }
 
 model ProductVariantImage {
-  id                Int @id @default(autoincrement())
+  id                Int               @id @default(autoincrement())
   url               String
-  isPrimary         Boolean @default(false)
+  publicId          String
+  isPrimary         Boolean           @default(false)
   sortOrder         Int?
-  productVariantId   Int
-  productVariant    ProductVariant @relation(fields: [productVariantId], references: [id])
-  createdAt         DateTime @default(now())
+  productVariantId  Int
+  productVariant    ProductVariant    @relation(fields: [productVariantId], references: [id])
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime           @updatedAt
   @@map("product_variant_images")
 }
 

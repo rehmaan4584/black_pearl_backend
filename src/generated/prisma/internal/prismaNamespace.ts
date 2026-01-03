@@ -1017,10 +1017,12 @@ export type ProductVariantScalarFieldEnum = (typeof ProductVariantScalarFieldEnu
 export const ProductVariantImageScalarFieldEnum = {
   id: 'id',
   url: 'url',
+  publicId: 'publicId',
   isPrimary: 'isPrimary',
   sortOrder: 'sortOrder',
   productVariantId: 'productVariantId',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 } as const
 
 export type ProductVariantImageScalarFieldEnum = (typeof ProductVariantImageScalarFieldEnum)[keyof typeof ProductVariantImageScalarFieldEnum]

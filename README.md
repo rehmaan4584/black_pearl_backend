@@ -1,5 +1,104 @@
 # Black Pearl Backend
 
+A NestJS backend for Black Pearl, using PostgreSQL with Prisma and Cloudinary for image storage.
+
+## Overview
+
+- Framework: NestJS
+- Database: PostgreSQL
+- ORM: Prisma
+- Image storage: Cloudinary
+
+## New: Product Variant & Images
+
+This project now includes:
+
+- `ProductVariant` model: represents a variant of a `Product` (size, color, SKU, price, optional inventory, relation to images).
+- `ProductVariantImage` model: stores image metadata and URLs for a `ProductVariant` and marks a primary image or ordering.
+
+Code locations:
+
+- Product variant module: [src/product-variant/product-variant.module.ts](src/product-variant/product-variant.module.ts)
+- Product variant service/controller: [src/product-variant/product-variant.service.ts](src/product-variant/product-variant.service.ts), [src/product-variant/product-variant.controller.ts](src/product-variant/product-variant.controller.ts)
+- Product variant image module: [src/product-variant-image/product-variant-image.module.ts](src/product-variant-image/product-variant-image.module.ts)
+- Product variant image service/controller: [src/product-variant-image/product-variant-image.service.ts](src/product-variant-image/product-variant-image.service.ts), [src/product-variant-image/product-variant-image.controller.ts](src/product-variant-image/product-variant-image.controller.ts)
+
+## Cloudinary integration
+
+Images are uploaded to Cloudinary. The project includes a `CloudinaryService` used by image upload endpoints.
+
+File: [src/cloudinary/cloudinary.service.ts](src/cloudinary/cloudinary.service.ts)
+
+Required environment variables (set in `.env`):
+
+```env
+DATABASE_URL="postgresql://user:password@localhost:5432/your_db"
+JWT_SECRET=your_jwt_secret
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+```
+
+Common usage:
+
+- Upload image endpoint: typically `POST /product-variants/:id/images` which accepts multipart/form-data and stores the returned Cloudinary `secure_url` in `ProductVariantImage.url`.
+- Services call the Cloudinary client via the `CloudinaryService` to upload and to optionally delete images.
+
+## Prisma schema changes & migrations
+
+The `prisma/schema.prisma` contains the new `ProductVariant` and `ProductVariantImage` models. After pulling changes or modifying the schema locally:
+
+```bash
+npx prisma migrate dev --name add-product-variant-and-images
+npx prisma generate
+```
+
+Migrations are stored in `prisma/migrations/`.
+
+If you need to examine the generated Prisma client, look in `src/generated/prisma`.
+
+## API examples
+
+- Create a product variant (example): `POST /products/:productId/variants` with body `{ "size": "M", "color": "blue", "sku": "SKU123", "price": 49.99 }`.
+- Upload an image for a variant: `POST /product-variants/:variantId/images` (multipart file field `image`). Response includes the stored image record.
+
+See controllers in [src/product-variant](src/product-variant) and [src/product-variant-image](src/product-variant-image) for exact route names and payload shapes.
+
+## Running locally
+
+1. Install dependencies:
+
+```bash
+npm install
+```
+
+2. Set `.env` with required variables (see Cloudinary and DB vars above).
+
+3. Run migrations and generate client:
+
+```bash
+npx prisma migrate dev
+npx prisma generate
+```
+
+4. Start the app:
+
+```bash
+npm run start:dev
+```
+
+## Tests & next steps
+
+- Run unit tests: `npm run test`
+- Run end-to-end tests: `npm run test:e2e`
+
+If you want, I can run tests locally and create a commit for the README changes.
+
+---
+
+Author: Black Pearl team
+# Black Pearl Backend
+
 A NestJS backend application with PostgreSQL database integration using Prisma ORM.
 
 ## Overview

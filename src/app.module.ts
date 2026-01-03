@@ -6,6 +6,8 @@ import { UserModule } from './user/user.module';
 import configuration from './config/app.config';
 import { configValidationSchema } from './config/app.config.schema';
 import { ProductsModule } from './products/products.module';
+import { ProductVariantModule } from './product-variant/product-variant.module';
+import { ProductVariantImageModule } from './product-variant-image/product-variant-image.module';
 
 @Module({
   imports: [
@@ -17,6 +19,8 @@ import { ProductsModule } from './products/products.module';
     AuthModule,
     UserModule,
     ProductsModule,
+    ProductVariantModule,
+    ProductVariantImageModule,
   ],
   controllers: [],
   providers: [PrismaService],
