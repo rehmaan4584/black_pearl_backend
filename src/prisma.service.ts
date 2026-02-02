@@ -19,6 +19,8 @@ export class PrismaService extends PrismaClient {
       console.log('Database connection successfully established.');
     } catch (error) {
       console.error('Failed to connect to the database:', error); 
+      throw error;
+
     }
   }
 
