@@ -11,4 +11,8 @@ export class ProductsService {
         return this.productRepo.createProduct(data);
     }
 
+    getAllProductsWithDetails(){
+        return this.productRepo.getProductsWithDetails();
+    }
+
 }

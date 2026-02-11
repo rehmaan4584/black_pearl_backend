@@ -10,4 +10,19 @@ export class ProductRepository {
   createProduct(data: CreateProductDto): Promise<Product | null> {
     return this.prisma.product.create({ data });
   }
+
+  getProductsWithDetails(){
+    return this.prisma.product.findMany({
+      include:{
+        variants:{
+          include:{
+            images:{
+              orderBy: {sortOrder: 'asc'}
+            }
+          }
+        }
+      },
+      orderBy: {createdAt: 'desc'}
+    });
+  }
 }
