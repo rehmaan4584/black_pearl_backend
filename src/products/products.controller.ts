@@ -1,5 +1,6 @@
-import { Controller, Post, Body, UseGuards,Get } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards,Get,Put, Param, ParseIntPipe } from '@nestjs/common';
 import { CreateProductDto } from './dto/createProduct.dto';
+import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductsService } from './products.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
@@ -21,6 +22,24 @@ export class ProductsController {
   @Get('get-all-withDetails')
   getAllProducts() {
     return this.productService.getAllProductsWithDetails();
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SELLER')
+  @Get('details/:id')
+  getPoductDetailById(
+  @Param('id',ParseIntPipe) id: number,
+ ) {
+    return this.productService.getProductDetailById(id);
+  }
+  
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SELLER')
+  @Put('update-product-with-variant/:id')
+  updateProductWithVariants(
+  @Param('id',ParseIntPipe) id: number,
+  @Body() body: UpdateProductDto ) {
+    return this.productService.updateProductWithVariants(id,body);
   }
 
 }

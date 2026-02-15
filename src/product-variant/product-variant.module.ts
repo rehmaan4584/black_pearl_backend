@@ -9,5 +9,6 @@ import { AuthModule } from 'src/auth/auth.module';
   imports: [AuthModule],
   controllers: [ProductVariantController],
   providers: [ProductVariantService, ProductVariantRepository, PrismaService],
+  exports:[ProductVariantRepository]
 })
 export class ProductVariantModule {}

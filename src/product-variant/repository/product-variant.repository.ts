@@ -11,4 +11,26 @@ export class ProductVariantRepository {
   ): Promise<ProductVariant> {
     return this.prisma.productVariant.create({ data });
   }
+
+   updateProductVariant(
+    id: number,
+    data: Prisma.ProductVariantUpdateInput,
+  ): Promise<ProductVariant> {
+    return this.prisma.productVariant.update({
+      where: { id },
+      data,
+    });
+  }
+
+  deleteByProductId(productId: number) {
+    return this.prisma.productVariant.deleteMany({
+      where: { productId },
+    });
+  }
+
+  deleteById(id: number) {
+    return this.prisma.productVariant.delete({
+      where: { id },
+    });
+  }
 }

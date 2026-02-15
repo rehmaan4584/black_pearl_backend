@@ -1,0 +1,117 @@
+import {
+  ProductTypes,
+  ProductGender,
+  ProductVariantSizes,
+  ProductVariantColors,
+} from 'src/generated/prisma/enums';
+import { Transform, Type } from 'class-transformer';
+import {
+  IsString,
+  IsInt,
+  IsBoolean,
+  IsOptional,
+  IsEnum,
+  IsArray,
+  ValidateNested,
+} from 'class-validator';
+
+class UpdateImageDto {
+  @IsOptional()
+  @IsInt()
+  @Type(() => Number)
+  id?: number; // For updating existing image
+
+  @IsInt()
+  @Type(() => Number)
+  productVariantId: number;
+
+  @IsBoolean()
+  @IsOptional()
+  @Transform(({ value }) => {
+    if (value === 'true') return true;
+    if (value === 'false') return false;
+    return value;
+  })
+  isPrimary?: boolean;
+
+  @IsInt()
+  @IsOptional()
+  @Transform(({ value }) => parseInt(value, 10))
+  sortOrder?: number;
+
+  @IsString()
+  @IsOptional()
+  url?: string;
+
+  @IsString()
+  @IsOptional()
+  publicId?: string;
+}
+
+class UpdateVariantDto {
+  @IsOptional()
+  @IsInt()
+  @Type(() => Number)
+  id?: number; // For updating existing variant
+
+  @IsOptional()
+  @IsEnum(ProductVariantSizes)
+  size?: ProductVariantSizes;
+
+  @IsOptional()
+  @IsEnum(ProductVariantColors)
+  color?: ProductVariantColors;
+
+  @IsOptional()
+  @IsInt()
+  @Type(() => Number)
+  price?: number;
+
+  @IsOptional()
+  @IsInt()
+  @Type(() => Number)
+  stock?: number;
+
+  @IsOptional()
+  @IsString()
+  sku?: string;
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => UpdateImageDto)
+  images?: UpdateImageDto[];
+}
+
+export class UpdateProductDto {
+   @IsOptional()
+  @IsInt()
+  @Type(() => Number)
+  id?: number; // For updating existing variant
+  
+  @IsOptional()
+  @IsString()
+  title?: string;
+
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @IsOptional()
+  @IsEnum(ProductTypes)
+  type?: ProductTypes;
+
+  @IsOptional()
+  @IsEnum(ProductGender)
+  gender?: ProductGender;
+
+  @IsOptional()
+  @IsString()
+  brand?: string;
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => UpdateVariantDto)
+  variants?: UpdateVariantDto[];
+}

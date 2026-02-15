@@ -7,6 +7,7 @@ import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 
 @Module({
   controllers: [ProductVariantImageController],
-  providers: [ProductVariantImageService, PrismaService,ProductVariantImageRepository,CloudinaryService]
+  providers: [ProductVariantImageService, PrismaService,ProductVariantImageRepository,CloudinaryService],
+  exports: [ProductVariantImageRepository]
 })
 export class ProductVariantImageModule {}
