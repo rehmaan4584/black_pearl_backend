@@ -1,19 +1,18 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
-  moduleFormat    = "cjs"
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
 }
 
 datasource db {
   provider = "postgresql"
-
 }
+
+// ============================================
+// USER
+// ============================================
+
 model User {
   id           Int       @id @default(autoincrement())
   name         String?
@@ -25,122 +24,208 @@ model User {
   streetNumber String?
   town         String?
   city         String?
-  orders       Order[]
   country      String?
+  orders       Order[]
+  cart         Cart?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
   @@map("users")
 }
 
+// ============================================
+// CATEGORY + SUBCATEGORY
+// ============================================
+
+model Category {
+  id            Int           @id @default(autoincrement())
+  name          String        @unique
+  slug          String        @unique
+  description   String?
+  subCategories SubCategory[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@map("categories")
+}
+
+model SubCategory {
+  id          Int       @id @default(autoincrement())
+  name        String
+  slug        String    @unique
+  description String?
+  category    Category  @relation(fields: [categoryId], references: [id])
+  categoryId  Int
+  products    Product[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("sub_categories")
+}
+
+// ============================================
+// SIZE + COLOR
+// ============================================
+
+model Size {
+  id              Int              @id @default(autoincrement())
+  name            String           @unique // "S", "M", "L", "XL", "XXL"
+  displayOrder    Int              // S=1, M=2, L=3, XL=4, XXL=5
+  productVariants ProductVariant[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  @@map("sizes")
+}
+
+model Color {
+  id              Int              @id @default(autoincrement())
+  name            String           @unique // "Black", "Dark Blue"
+  hexCode         String           @unique // "#000000", "#00008B"
+  productVariants ProductVariant[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  @@map("colors")
+}
+
+// ============================================
+// PRODUCT
+// ============================================
+
 model Product {
-  id          Int           @id @default(autoincrement())
-  title       String
-  description String       
-  type        ProductTypes
-  variants    ProductVariant[]
-  gender      ProductGender
-  brand       String        @default("Black Pearl")
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  id            Int              @id @default(autoincrement())
+  title         String
+  description   String
+  gender        ProductGender
+  brand         String           @default("Black Pearl")
+  subCategory   SubCategory?     @relation(fields: [subCategoryId], references: [id])
+  subCategoryId Int?
+  variants      ProductVariant[]
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
 
   @@map("products")
 }
 
 model ProductVariant {
-  id               Int               @id @default(autoincrement())
-  product          Product           @relation(fields: [productId], references: [id])
+  id               Int                   @id @default(autoincrement())
+  product          Product               @relation(fields: [productId], references: [id])
   productId        Int
-  size             ProductVariantSizes
-  color            ProductVariantColors
+  size             Size                  @relation(fields: [sizeId], references: [id])
+  sizeId           Int
+  color            Color                 @relation(fields: [colorId], references: [id])
+  colorId          Int
+  sku              String                @unique
+  price            Int
   orderItems       OrderItem[]
+  cartItems        CartItem[]
   images           ProductVariantImage[]
   inventory        Inventory?
-  sku              String            @unique
-  price            Int
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
+  createdAt        DateTime              @default(now())
+  updatedAt        DateTime              @updatedAt
 
   @@map("product_variants")
 }
 
 model ProductVariantImage {
-  id                Int               @id @default(autoincrement())
-  url               String
-  publicId          String
-  isPrimary         Boolean           @default(false)
-  sortOrder         Int?
-  productVariantId  Int
-  productVariant    ProductVariant    @relation(fields: [productVariantId], references: [id])
-  createdAt         DateTime          @default(now())
-  updatedAt         DateTime           @updatedAt
+  id               Int            @id @default(autoincrement())
+  url              String
+  publicId         String
+  isPrimary        Boolean        @default(false)
+  sortOrder        Int?
+  productVariant   ProductVariant @relation(fields: [productVariantId], references: [id])
+  productVariantId Int
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
   @@map("product_variant_images")
 }
 
+// ============================================
+// INVENTORY
+// ============================================
+
+model Inventory {
+  id               Int            @id @default(autoincrement())
+  productVariant   ProductVariant @relation(fields: [productVariantId], references: [id])
+  productVariantId Int            @unique
+  quantity         Int
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  @@map("inventory")
+}
+
+// ============================================
+// CART
+// ============================================
+
+model Cart {
+  id        Int        @id @default(autoincrement())
+  user      User       @relation(fields: [userId], references: [id])
+  userId    Int        @unique // har user ka sirf ek cart
+  items     CartItem[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@map("carts")
+}
+
+model CartItem {
+  id               Int            @id @default(autoincrement())
+  cart             Cart           @relation(fields: [cartId], references: [id])
+  cartId           Int
+  productVariant   ProductVariant @relation(fields: [productVariantId], references: [id])
+  productVariantId Int
+  quantity         Int
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  @@unique([cartId, productVariantId]) // same variant duplicate nahi hoga
+
+  @@map("cart_items")
+}
+
+// ============================================
+// ORDER
+// ============================================
+
 model Order {
-  id                Int             @id @default(autoincrement())
-  user              User            @relation(fields: [userId], references: [id])
-  userId            Int
-  status            OrderStatus     @default(PENDING)
-  orderItems        OrderItem[]
-  createdAt         DateTime        @default(now())
-  updatedAt         DateTime        @updatedAt
+  id          Int         @id @default(autoincrement())
+  user        User        @relation(fields: [userId], references: [id])
+  userId      Int
+  status      OrderStatus @default(PENDING)
+  totalAmount Int
+  orderItems  OrderItem[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
 
   @@map("orders")
 }
 
 model OrderItem {
-  id               Int             @id @default(autoincrement())
-  order            Order           @relation(fields: [orderId], references: [id])
+  id               Int            @id @default(autoincrement())
+  order            Order          @relation(fields: [orderId], references: [id])
   orderId          Int
-  productVariant   ProductVariant  @relation(fields: [productVariantId], references: [id])
+  productVariant   ProductVariant @relation(fields: [productVariantId], references: [id])
   productVariantId Int
   quantity         Int
-  price            Int
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
+  price            Int            // price at time of order — important!
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
 
   @@map("order_items")
 }
 
-model Inventory {
-  id               Int             @id @default(autoincrement())
-  productVariant   ProductVariant  @relation(fields: [productVariantId], references: [id])
-  productVariantId Int             @unique
-  quantity         Int
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
-
-  @@map("inventory")
-}
-
+// ============================================
+// ENUMS — SIRF FIXED VALUES
+// ============================================
 
 enum ProductGender {
   MEN
   WOMEN
   UNISEX
-}
-
-enum ProductTypes {
-  JEANS
-  SHORTS
-  SHIRTS
-  KNICKERS
-}
-
-enum ProductVariantSizes {
-  S
-  M
-  L
-  XL
-  XXL
-}
-
-enum ProductVariantColors {
-  BLACK
-  BLUE
-  DARK_BLUE
-  LIGHT_BLUE
 }
 
 enum OrderStatus {

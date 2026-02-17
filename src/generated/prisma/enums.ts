@@ -18,37 +18,6 @@ export const ProductGender = {
 export type ProductGender = (typeof ProductGender)[keyof typeof ProductGender]
 
 
-export const ProductTypes = {
-  JEANS: 'JEANS',
-  SHORTS: 'SHORTS',
-  SHIRTS: 'SHIRTS',
-  KNICKERS: 'KNICKERS'
-} as const
-
-export type ProductTypes = (typeof ProductTypes)[keyof typeof ProductTypes]
-
-
-export const ProductVariantSizes = {
-  S: 'S',
-  M: 'M',
-  L: 'L',
-  XL: 'XL',
-  XXL: 'XXL'
-} as const
-
-export type ProductVariantSizes = (typeof ProductVariantSizes)[keyof typeof ProductVariantSizes]
-
-
-export const ProductVariantColors = {
-  BLACK: 'BLACK',
-  BLUE: 'BLUE',
-  DARK_BLUE: 'DARK_BLUE',
-  LIGHT_BLUE: 'LIGHT_BLUE'
-} as const
-
-export type ProductVariantColors = (typeof ProductVariantColors)[keyof typeof ProductVariantColors]
-
-
 export const OrderStatus = {
   PENDING: 'PENDING',
   PAID: 'PAID',
