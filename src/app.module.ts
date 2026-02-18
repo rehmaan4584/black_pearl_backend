@@ -9,6 +9,9 @@ import { ProductsModule } from './products/products.module';
 import { ProductVariantModule } from './product-variant/product-variant.module';
 import { ProductVariantImageModule } from './product-variant-image/product-variant-image.module';
 import { CategoryModule } from './category/category.module';
+import { SubCategoryModule } from './sub-category/sub-category.module';
+import { SizeModule } from './size/size.module';
+import { ColorModule } from './color/color.module';
 
 @Module({
   imports: [
@@ -23,6 +26,9 @@ import { CategoryModule } from './category/category.module';
     ProductVariantModule,
     ProductVariantImageModule,
     CategoryModule,
+    SubCategoryModule,
+    SizeModule,
+    ColorModule,
   ],
   controllers: [],
   providers: [PrismaService],
