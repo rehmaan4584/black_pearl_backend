@@ -1,5 +1,6 @@
 
-import { IsOptional, IsString, IsInt } from 'class-validator';
+import { IsOptional, IsString, IsInt, IsEnum } from 'class-validator';
+import { ProductGender } from 'src/generated/prisma/enums';
 
 export class CreateProductDto {
   @IsString()
@@ -12,8 +13,8 @@ export class CreateProductDto {
   @IsInt()
   subCategoryId: number;
 
-  @IsString()
-  gender: string; // or use enum if still present
+  @IsEnum(ProductGender)
+  gender: ProductGender;
 
   @IsOptional()
   @IsString()

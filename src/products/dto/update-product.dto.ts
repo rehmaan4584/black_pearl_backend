@@ -1,4 +1,6 @@
 // Removed enums for type, size, color
+import { IsEnum } from 'class-validator';
+import { ProductGender } from 'src/generated/prisma/enums';
 import { Transform, Type } from 'class-transformer';
 import {
   IsString,
@@ -96,7 +98,8 @@ export class UpdateProductDto {
   subCategoryId?: number;
 
   @IsOptional()
-  gender?: string;
+  @IsEnum(ProductGender)
+  gender?: ProductGender;
 
   @IsOptional()
   @IsString()
