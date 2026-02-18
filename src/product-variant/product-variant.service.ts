@@ -15,6 +15,6 @@ export class ProductVariantService {
   }
 
   private generateSku(dto: CreateProductVariantDto): string {
-    return `${Date.now()}-${dto.size}-${dto.color}`;
+    return `${Date.now()}-${dto.sizeId}-${dto.colorId}`;
   }
 }

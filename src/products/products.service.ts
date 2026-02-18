@@ -34,8 +34,8 @@ export class ProductsService {
     const updatedProduct = await this.productRepo.updateProduct(id, {
       title: data.title,
       description: data.description,
-      type: data.type,
-      gender: data.gender,
+      subCategory: data.subCategoryId ? { connect: { id: data.subCategoryId } } : undefined,
+      gender: data.gender as any,
       brand: data.brand,
     });
 
@@ -47,8 +47,8 @@ export class ProductsService {
           const updatedVariant = await this.variantRepo.updateProductVariant(
             variant.id,
             {
-              size: variant.size,
-              color: variant.color,
+              size: variant.sizeId ? { connect: { id: variant.sizeId } } : undefined,
+              color: variant.colorId ? { connect: { id: variant.colorId } } : undefined,
               price: variant.price,
               sku: variant.sku,
             }
@@ -81,8 +81,8 @@ export class ProductsService {
           // Create new variant
           const newVariant = await this.variantRepo.createProductVariant({
             productId: id,
-            size: variant.size!,
-            color: variant.color!,
+            sizeId: variant.sizeId!,
+            colorId: variant.colorId!,
             price: variant.price!,
             sku: variant.sku!,
           });

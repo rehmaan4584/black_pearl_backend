@@ -1,16 +1,10 @@
-import {
-  ProductTypes,
-  ProductGender,
-  ProductVariantSizes,
-  ProductVariantColors,
-} from 'src/generated/prisma/enums';
+// Removed enums for type, size, color
 import { Transform, Type } from 'class-transformer';
 import {
   IsString,
   IsInt,
   IsBoolean,
   IsOptional,
-  IsEnum,
   IsArray,
   ValidateNested,
 } from 'class-validator';
@@ -54,13 +48,14 @@ class UpdateVariantDto {
   @Type(() => Number)
   id?: number; // For updating existing variant
 
-  @IsOptional()
-  @IsEnum(ProductVariantSizes)
-  size?: ProductVariantSizes;
 
   @IsOptional()
-  @IsEnum(ProductVariantColors)
-  color?: ProductVariantColors;
+  @IsInt()
+  sizeId?: number;
+
+  @IsOptional()
+  @IsInt()
+  colorId?: number;
 
   @IsOptional()
   @IsInt()
@@ -98,12 +93,10 @@ export class UpdateProductDto {
   description?: string;
 
   @IsOptional()
-  @IsEnum(ProductTypes)
-  type?: ProductTypes;
+  subCategoryId?: number;
 
   @IsOptional()
-  @IsEnum(ProductGender)
-  gender?: ProductGender;
+  gender?: string;
 
   @IsOptional()
   @IsString()

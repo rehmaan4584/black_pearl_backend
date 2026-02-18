@@ -1,20 +1,16 @@
-import { IsEnum, IsInt, IsString } from 'class-validator';
-import {
-  ProductVariantSizes,
-  ProductVariantColors,
-} from 'src/generated/prisma/enums';
+
+import { IsInt } from 'class-validator';
 
 export class CreateProductVariantDto {
   @IsInt()
   productId: number;
 
-  @IsEnum(ProductVariantSizes)
-  size: ProductVariantSizes;
+  @IsInt()
+  sizeId: number;
 
-  @IsEnum(ProductVariantColors)
-  color: ProductVariantColors;
+  @IsInt()
+  colorId: number;
 
   @IsInt()
   price: number;
-
 }
