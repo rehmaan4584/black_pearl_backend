@@ -16,8 +16,15 @@ export class ProductRepository {
   getAllProductsWithDetails() {
     return this.prisma.product.findMany({
       include: {
+        subCategory: {
+          include: {
+            category: true,
+          },
+        },
         variants: {
           include: {
+            size: true,
+            color: true,
             images: {
               orderBy: { sortOrder: 'asc' },
             },
@@ -28,12 +35,19 @@ export class ProductRepository {
     });
   }
 
-  productDetailById(id:number){
+  productDetailById(id: number) {
     return this.prisma.product.findUnique({
-      where: {id},
+      where: { id },
       include: {
+        subCategory: {
+          include: {
+            category: true,
+          },
+        },
         variants: {
           include: {
+            size: true,
+            color: true,
             images: {
               orderBy: { sortOrder: 'asc' },
             },
@@ -43,13 +57,10 @@ export class ProductRepository {
     });
   }
 
-  updateProduct(
-  id: number,
-  data: Prisma.ProductUpdateInput
-): Promise<Product> {
-  return this.prisma.product.update({
-    where: { id },
-    data,
-  });
-}
+  updateProduct(id: number, data: Prisma.ProductUpdateInput): Promise<Product> {
+    return this.prisma.product.update({
+      where: { id },
+      data,
+    });
+  }
 }

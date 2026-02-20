@@ -6,10 +6,12 @@ import { AuthModule } from 'src/auth/auth.module';
 import { ProductVariantModule } from 'src/product-variant/product-variant.module';
 import { ProductVariantImageModule } from 'src/product-variant-image/product-variant-image.module';
 import { PrismaService } from 'src/prisma.service';
+import { SubCategoryModule } from 'src/sub-category/sub-category.module';
 
 @Module({
-  imports: [AuthModule,ProductVariantModule,ProductVariantImageModule],
+  imports: [AuthModule,ProductVariantModule,ProductVariantImageModule,SubCategoryModule],
   providers: [ProductsService,ProductRepository,PrismaService],
-  controllers: [ProductsController]
+  controllers: [ProductsController],
+  exports: [ProductsService, ProductRepository],
 })  
 export class ProductsModule {}
