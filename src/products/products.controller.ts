@@ -10,6 +10,11 @@ import { Roles } from 'src/auth/decorators/roles.decorator';
 export class ProductsController {
   constructor(private productService: ProductsService) {}
 
+  @Get()
+  getPublicProducts() {
+    return this.productService.getPublicProducts();
+  }
+
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('SELLER')
   @Post('create')
@@ -40,6 +45,11 @@ export class ProductsController {
   @Param('id',ParseIntPipe) id: number,
   @Body() body: UpdateProductDto ) {
     return this.productService.updateProductWithVariants(id,body);
+  }
+
+  @Get(':id')
+  getPublicProductById(@Param('id', ParseIntPipe) id: number) {
+    return this.productService.getPublicProductById(id);
   }
 
 }

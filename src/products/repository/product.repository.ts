@@ -13,6 +13,52 @@ export class ProductRepository {
     return this.prisma.product.create({ data });
   }
 
+  getPublicProducts() {
+    return this.prisma.product.findMany({
+      include: {
+        subCategory: {
+          include: {
+            category: true,
+          },
+        },
+        variants: {
+          include: {
+            size: true,
+            color: true,
+            inventory: true,
+            images: {
+              orderBy: { sortOrder: 'asc' },
+            },
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  getPublicProductById(id: number) {
+    return this.prisma.product.findUnique({
+      where: { id },
+      include: {
+        subCategory: {
+          include: {
+            category: true,
+          },
+        },
+        variants: {
+          include: {
+            size: true,
+            color: true,
+            inventory: true,
+            images: {
+              orderBy: { sortOrder: 'asc' },
+            },
+          },
+        },
+      },
+    });
+  }
+
   getAllProductsWithDetails() {
     return this.prisma.product.findMany({
       include: {

@@ -8,6 +8,39 @@ import { ProductVariantRepository } from 'src/product-variant/repository/product
 import { ProductVariantImageRepository } from 'src/product-variant-image/repository/product-variant-image.repository';
 import { SubCategoryRepository } from 'src/sub-category/repository/sub-category.repository';
 
+type StoreProductSource = {
+  id: number;
+  title: string;
+  description: string;
+  gender: string;
+  brand: string;
+  subCategory?: {
+    name?: string | null;
+    category?: {
+      name?: string | null;
+    } | null;
+  } | null;
+  variants: StoreProductVariantSource[];
+};
+
+type StoreProductVariantSource = {
+  id: number;
+  productId: number;
+  size?: {
+    name?: string | null;
+  } | null;
+  color?: {
+    name?: string | null;
+    hexCode?: string | null;
+  } | null;
+  sku: string;
+  price: number;
+  images: unknown[];
+  inventory?: {
+    quantity: number;
+  } | null;
+};
+
 @Injectable()
 export class ProductsService {
   constructor(
@@ -17,6 +50,38 @@ export class ProductsService {
     private imageRepo: ProductVariantImageRepository,
     private subCategoryRepo: SubCategoryRepository,
   ) {}
+
+  private toStoreFilterValue(value?: string | null) {
+    return value?.trim().toUpperCase().replace(/\s+/g, '_') ?? 'UNCATEGORIZED';
+  }
+
+  private toStoreProduct(product: StoreProductSource) {
+    const productType =
+      product.subCategory?.name ?? product.subCategory?.category?.name;
+
+    return {
+      id: product.id,
+      title: product.title,
+      description: product.description,
+      type: this.toStoreFilterValue(productType),
+      gender: product.gender,
+      brand: product.brand,
+      variants: product.variants.map((variant) => ({
+        id: variant.id,
+        productId: variant.productId,
+        size: variant.size?.name ?? '',
+        color: this.toStoreFilterValue(variant.color?.name),
+        colorName: variant.color?.name ?? '',
+        colorHex: variant.color?.hexCode ?? null,
+        sku: variant.sku,
+        price: variant.price,
+        images: variant.images,
+        inventory: variant.inventory
+          ? { quantity: variant.inventory.quantity }
+          : { quantity: 0 },
+      })),
+    };
+  }
 
   async createProduct(data: CreateProductDto): Promise<Product | null> {
     if (data.subCategoryId) {
@@ -30,6 +95,19 @@ export class ProductsService {
       }
     }
     return this.productRepo.createProduct(data);
+  }
+
+  async getPublicProducts() {
+    const products = await this.productRepo.getPublicProducts();
+    return products.map((product) => this.toStoreProduct(product));
+  }
+
+  async getPublicProductById(id: number) {
+    const product = await this.productRepo.getPublicProductById(id);
+    if (!product) {
+      throw new NotFoundException(`Product with ID ${id} not found`);
+    }
+    return this.toStoreProduct(product);
   }
 
   getAllProductsWithDetails() {

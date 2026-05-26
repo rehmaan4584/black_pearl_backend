@@ -8,6 +8,7 @@ import {
   Delete,
   ParseIntPipe,
   Query,
+  BadRequestException,
 } from '@nestjs/common';
 import { SubCategoryService } from './sub-category.service';
 import { CreateSubCategoryDto } from './dto/create-sub-category.dto';
@@ -23,10 +24,14 @@ export class SubCategoryController {
   }
 
   @Get()
-  findAll(@Query('categoryId', ParseIntPipe) categoryId?: number) {
+  findAll(@Query('categoryId') categoryId?: string) {
     // If categoryId query param is provided, filter by category
     if (categoryId) {
-      return this.subCategoryService.findByCategory(categoryId);
+      const parsedCategoryId = Number(categoryId);
+      if (!Number.isInteger(parsedCategoryId)) {
+        throw new BadRequestException('categoryId must be a number');
+      }
+      return this.subCategoryService.findByCategory(parsedCategoryId);
     }
     return this.subCategoryService.findAll();
   }
