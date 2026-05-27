@@ -9,6 +9,8 @@ export const configValidationSchema = Joi.object({
 
   DATABASE_URL: Joi.string().required(),
 
+  CORS_ORIGINS: Joi.string().optional(),
+
   CLOUDINARY_CLOUD_NAME: Joi.string().required(),
   CLOUDINARY_API_KEY: Joi.string().required(),
   CLOUDINARY_API_SECRET: Joi.string().required(),

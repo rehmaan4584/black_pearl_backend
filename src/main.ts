@@ -14,10 +14,11 @@ async function bootstrap() {
     }),
   );
 
+  const configuration = app.get(ConfigService);
   app.enableCors({
-    origin: ['http://localhost:3002','http://localhost:3001'], // frontend URL
+    origin: configuration.get<string[]>('cors.origins') ?? [],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    credentials: true, // agar cookies/token bhejna ho
+    credentials: true,
   });
 
   const config = new DocumentBuilder()
@@ -29,7 +30,6 @@ async function bootstrap() {
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, documentFactory);
-  const configuration = app.get(ConfigService);
   const port = configuration.get<number>('port') ?? 3000;
   const environment = configuration.get<string>('environment');
   await app.listen(port);

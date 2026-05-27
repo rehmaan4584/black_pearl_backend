@@ -5,6 +5,12 @@ export default () => ({
     secret: process.env.JWT_SECRET,
     expiresIn: '1h',
   },
+  cors: {
+    origins: (process.env.CORS_ORIGINS || 'http://localhost:3000,http://localhost:3001,http://localhost:3002')
+      .split(',')
+      .map((origin) => origin.trim())
+      .filter(Boolean),
+  },
   database: {
     url: process.env.DATABASE_URL,
   },

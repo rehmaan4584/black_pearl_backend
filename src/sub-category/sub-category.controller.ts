@@ -9,15 +9,21 @@ import {
   ParseIntPipe,
   Query,
   BadRequestException,
+  UseGuards,
 } from '@nestjs/common';
 import { SubCategoryService } from './sub-category.service';
 import { CreateSubCategoryDto } from './dto/create-sub-category.dto';
 import { UpdateSubCategoryDto } from './dto/update-sub-category.dto';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { Roles } from 'src/auth/decorators/roles.decorator';
 
 @Controller("sub-categories")
 export class SubCategoryController {
   constructor(private readonly subCategoryService: SubCategoryService) {}
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SELLER')
   @Post()
   create(@Body() createSubCategoryDto: CreateSubCategoryDto) {
     return this.subCategoryService.create(createSubCategoryDto);
@@ -41,6 +47,8 @@ export class SubCategoryController {
     return this.subCategoryService.findOne(id);
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SELLER')
   @Patch(':id')
   update(
     @Param('id', ParseIntPipe) id: number,
@@ -49,6 +57,8 @@ export class SubCategoryController {
     return this.subCategoryService.update(id, updateSubCategoryDto);
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SELLER')
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.subCategoryService.remove(id);
