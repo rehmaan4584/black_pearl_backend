@@ -12,6 +12,7 @@ import { CategoryModule } from './category/category.module';
 import { SubCategoryModule } from './sub-category/sub-category.module';
 import { SizeModule } from './size/size.module';
 import { ColorModule } from './color/color.module';
+import { CartModule } from './cart/cart.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { ColorModule } from './color/color.module';
     SubCategoryModule,
     SizeModule,
     ColorModule,
+    CartModule,
   ],
   controllers: [],
   providers: [PrismaService],

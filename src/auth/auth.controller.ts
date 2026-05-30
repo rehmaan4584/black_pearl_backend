@@ -3,11 +3,16 @@ import { RegisterUserDto} from './dto/register.dto';
 import { ResponseUserDto } from './dto/responseUser.dto';
 import { AuthService } from './auth.service';
 // import { LoginUserDto } from './dto/login.dto';
-import { User } from 'src/generated/prisma/client';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import { RolesGuard } from './guards/roles.guard';
-import { Roles } from './decorators/roles.decorator';
+
+type AuthenticatedRequest = {
+  user: {
+    userId: number;
+    email: string;
+    role: string;
+  };
+};
 
 @Controller('auth')
 export class AuthController {
@@ -29,15 +34,9 @@ export class AuthController {
     return this.authService.login(req.user);
   }
 
-
-  //example controller to test authguard
-  @UseGuards(JwtAuthGuard,RolesGuard)
-  @Roles('SELLER')
+  @UseGuards(JwtAuthGuard)
   @Get('me')
-  getUserInfo(@Req() req:any) {
-    return `this is protected route and user role is ${req.user.role}`
+  getUserInfo(@Req() req: AuthenticatedRequest) {
+    return req.user;
   }
-
-  //example to test role guard
-
 }
