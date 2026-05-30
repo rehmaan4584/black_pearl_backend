@@ -6,6 +6,44 @@ import { PrismaService } from 'src/prisma.service';
 export class OrdersService {
   constructor(private prisma: PrismaService) {}
 
+  private toOrderResponse(order: {
+    id: number;
+    status: string;
+    totalAmount: number;
+    orderItems: {
+      id: number;
+      productVariantId: number;
+      quantity: number;
+      price: number;
+      productVariant: {
+        product: { id: number; title: string };
+        size: { name: string };
+        color: { name: string };
+      };
+    }[];
+  }) {
+    return {
+      id: order.id,
+      status: order.status,
+      totalAmount: order.totalAmount,
+      items: order.orderItems.map((item) => ({
+        id: item.id,
+        productVariantId: item.productVariantId,
+        quantity: item.quantity,
+        price: item.price,
+        lineTotal: item.quantity * item.price,
+        product: {
+          id: item.productVariant.product.id,
+          title: item.productVariant.product.title,
+        },
+        variant: {
+          size: item.productVariant.size.name,
+          color: item.productVariant.color.name,
+        },
+      })),
+    };
+  }
+
   async createFromCart(userId: number) {
     return this.prisma.$transaction(async (tx) => {
       const cart = await tx.cart.findUnique({
@@ -96,26 +134,49 @@ export class OrdersService {
         where: { cartId: cart.id },
       });
 
-      return {
-        id: order.id,
-        status: order.status,
-        totalAmount: order.totalAmount,
-        items: order.orderItems.map((item) => ({
-          id: item.id,
-          productVariantId: item.productVariantId,
-          quantity: item.quantity,
-          price: item.price,
-          lineTotal: item.quantity * item.price,
-          product: {
-            id: item.productVariant.product.id,
-            title: item.productVariant.product.title,
+      return this.toOrderResponse(order);
+    });
+  }
+
+  async markPaid(orderId: number) {
+    return this.prisma.order.update({
+      where: { id: orderId },
+      data: { status: OrderStatus.PAID },
+    });
+  }
+
+  async cancelPendingOrder(orderId: number, userId?: number) {
+    return this.prisma.$transaction(async (tx) => {
+      const order = await tx.order.findFirst({
+        where: {
+          id: orderId,
+          status: OrderStatus.PENDING,
+          ...(userId ? { userId } : {}),
+        },
+        include: {
+          orderItems: true,
+        },
+      });
+
+      if (!order) {
+        return null;
+      }
+
+      for (const item of order.orderItems) {
+        await tx.inventory.update({
+          where: { productVariantId: item.productVariantId },
+          data: {
+            quantity: {
+              increment: item.quantity,
+            },
           },
-          variant: {
-            size: item.productVariant.size.name,
-            color: item.productVariant.color.name,
-          },
-        })),
-      };
+        });
+      }
+
+      return tx.order.update({
+        where: { id: order.id },
+        data: { status: OrderStatus.CANCELLED },
+      });
     });
   }
 }

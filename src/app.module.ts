@@ -14,6 +14,7 @@ import { SizeModule } from './size/size.module';
 import { ColorModule } from './color/color.module';
 import { CartModule } from './cart/cart.module';
 import { OrdersModule } from './orders/orders.module';
+import { CheckoutModule } from './checkout/checkout.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { OrdersModule } from './orders/orders.module';
     ColorModule,
     CartModule,
     OrdersModule,
+    CheckoutModule,
   ],
   controllers: [],
   providers: [PrismaService],
