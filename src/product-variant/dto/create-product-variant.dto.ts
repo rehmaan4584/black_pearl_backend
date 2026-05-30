@@ -1,5 +1,5 @@
 
-import { IsInt } from 'class-validator';
+import { IsInt, IsOptional, Min } from 'class-validator';
 
 export class CreateProductVariantDto {
   @IsInt()
@@ -13,4 +13,9 @@ export class CreateProductVariantDto {
 
   @IsInt()
   price: number;
+
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  stock?: number;
 }

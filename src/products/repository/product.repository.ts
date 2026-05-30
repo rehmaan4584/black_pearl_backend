@@ -71,6 +71,7 @@ export class ProductRepository {
           include: {
             size: true,
             color: true,
+            inventory: true,
             images: {
               orderBy: { sortOrder: 'asc' },
             },
@@ -94,6 +95,7 @@ export class ProductRepository {
           include: {
             size: true,
             color: true,
+            inventory: true,
             images: {
               orderBy: { sortOrder: 'asc' },
             },

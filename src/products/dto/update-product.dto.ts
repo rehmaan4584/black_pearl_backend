@@ -9,6 +9,7 @@ import {
   IsOptional,
   IsArray,
   ValidateNested,
+  Min,
 } from 'class-validator';
 
 class UpdateImageDto {
@@ -67,6 +68,7 @@ class UpdateVariantDto {
   @IsOptional()
   @IsInt()
   @Type(() => Number)
+  @Min(0)
   stock?: number;
 
   @IsOptional()

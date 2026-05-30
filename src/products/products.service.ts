@@ -159,6 +159,13 @@ export class ProductsService {
               },
             );
 
+            if (variant.stock !== undefined) {
+              await this.variantRepo.upsertInventory(
+                updatedVariant.id,
+                variant.stock,
+              );
+            }
+
             // 3️⃣ STEP 3: Update Images (Child of Variant)
             if (variant.images && variant.images.length > 0) {
               for (const image of variant.images) {
@@ -191,6 +198,11 @@ export class ProductsService {
               price: variant.price!,
               sku: variant.sku!,
             });
+
+            await this.variantRepo.upsertInventory(
+              newVariant.id,
+              variant.stock ?? 0,
+            );
 
             // Add images for new variant
             if (variant.images && variant.images.length > 0) {

@@ -7,11 +7,18 @@ import { ProductVariant } from 'src/generated/prisma/client';
 export class ProductVariantService {
   constructor(private productVariantRepo: ProductVariantRepository) {}
 
-  createProductVariant(
+  async createProductVariant(
     dto: CreateProductVariantDto,
   ): Promise<ProductVariant | null> {
     const sku = this.generateSku(dto);
-    return this.productVariantRepo.createProductVariant({ ...dto, sku });
+    const { stock, ...variantData } = dto;
+    const variant = await this.productVariantRepo.createProductVariant({
+      ...variantData,
+      sku,
+    });
+
+    await this.productVariantRepo.upsertInventory(variant.id, stock ?? 0);
+    return variant;
   }
 
   private generateSku(dto: CreateProductVariantDto): string {

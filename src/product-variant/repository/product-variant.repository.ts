@@ -33,4 +33,15 @@ export class ProductVariantRepository {
       where: { id },
     });
   }
+
+  upsertInventory(productVariantId: number, quantity: number) {
+    return this.prisma.inventory.upsert({
+      where: { productVariantId },
+      update: { quantity },
+      create: {
+        productVariantId,
+        quantity,
+      },
+    });
+  }
 }
