@@ -27,6 +27,21 @@ type AuthenticatedRequest = {
 export class OrdersController {
   constructor(private ordersService: OrdersService) {}
 
+  @UseGuards(JwtAuthGuard)
+  @Get('my')
+  findAllForBuyer(@Req() req: AuthenticatedRequest) {
+    return this.ordersService.findAllForBuyer(req.user.userId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('my/:id')
+  findByIdForBuyer(
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: AuthenticatedRequest,
+  ) {
+    return this.ordersService.findByIdForBuyer(id, req.user.userId);
+  }
+
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('SELLER')
   @Get()

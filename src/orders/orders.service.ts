@@ -138,6 +138,100 @@ export class OrdersService {
     };
   }
 
+  private toBuyerOrderSummary(order: {
+    id: number;
+    status: string;
+    totalAmount: number;
+    createdAt: Date;
+    orderItems: { id: number }[];
+  }) {
+    return {
+      id: order.id,
+      status: order.status,
+      totalAmount: order.totalAmount,
+      createdAt: order.createdAt,
+      itemCount: order.orderItems.length,
+    };
+  }
+
+  private toBuyerOrderDetail(order: {
+    id: number;
+    status: string;
+    totalAmount: number;
+    createdAt: Date;
+    updatedAt: Date;
+    orderItems: {
+      id: number;
+      productVariantId: number;
+      quantity: number;
+      price: number;
+      productVariant: {
+        product: { id: number; title: string };
+        size: { name: string };
+        color: { name: string };
+      };
+    }[];
+  }) {
+    return {
+      ...this.toBuyerOrderSummary(order),
+      updatedAt: order.updatedAt,
+      items: order.orderItems.map((item) => ({
+        id: item.id,
+        productVariantId: item.productVariantId,
+        quantity: item.quantity,
+        price: item.price,
+        lineTotal: item.quantity * item.price,
+        product: {
+          id: item.productVariant.product.id,
+          title: item.productVariant.product.title,
+        },
+        variant: {
+          size: item.productVariant.size.name,
+          color: item.productVariant.color.name,
+        },
+      })),
+    };
+  }
+
+  async findAllForBuyer(userId: number) {
+    const orders = await this.prisma.order.findMany({
+      where: { userId },
+      include: {
+        orderItems: {
+          select: { id: true },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return orders.map((order) => this.toBuyerOrderSummary(order));
+  }
+
+  async findByIdForBuyer(orderId: number, userId: number) {
+    const order = await this.prisma.order.findFirst({
+      where: { id: orderId, userId },
+      include: {
+        orderItems: {
+          include: {
+            productVariant: {
+              include: {
+                product: true,
+                size: true,
+                color: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!order) {
+      throw new NotFoundException(`Order with ID ${orderId} not found`);
+    }
+
+    return this.toBuyerOrderDetail(order);
+  }
+
   async findAllForSeller() {
     const orders = await this.prisma.order.findMany({
       include: orderInclude,
