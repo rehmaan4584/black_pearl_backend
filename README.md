@@ -1,358 +1,126 @@
 # Black Pearl Backend
 
-A NestJS backend for Black Pearl, using PostgreSQL with Prisma and Cloudinary for image storage.
+NestJS REST API for the **Black Pearl** e-commerce platform. Powers both the customer storefront and the seller admin portal — products, cart, orders, Stripe payments, and Cloudinary image uploads.
 
-## Overview
+**Live API:** https://rehman-bp-api.duckdns.org  
+**Swagger docs:** https://rehman-bp-api.duckdns.org/api
 
-- Framework: NestJS
-- Database: PostgreSQL
-- ORM: Prisma
-- Image storage: Cloudinary
+## Architecture
 
-## New: Product Variant & Images
+```
+Store (buyers)  ──┐
+                  ├──►  Black Pearl API  ──►  PostgreSQL
+Portal (sellers) ─┘         │
+                              ├── Stripe (checkout + webhooks)
+                              └── Cloudinary (product images)
+```
 
-This project now includes:
+## Tech stack
 
-- `ProductVariant` model: represents a variant of a `Product` (size, color, SKU, price, optional inventory, relation to images).
-- `ProductVariantImage` model: stores image metadata and URLs for a `ProductVariant` and marks a primary image or ordering.
+- **NestJS 11** · TypeScript · PostgreSQL · **Prisma 7**
+- **JWT auth** (Passport) — `BUYER` and `SELLER` roles
+- **Stripe** — Checkout Sessions + webhooks (PKR)
+- **Cloudinary** — variant image uploads
+- **Swagger** — interactive API docs at `/api`
 
-Code locations:
+## Features
 
-- Product variant module: [src/product-variant/product-variant.module.ts](src/product-variant/product-variant.module.ts)
-- Product variant service/controller: [src/product-variant/product-variant.service.ts](src/product-variant/product-variant.service.ts), [src/product-variant/product-variant.controller.ts](src/product-variant/product-variant.controller.ts)
-- Product variant image module: [src/product-variant-image/product-variant-image.module.ts](src/product-variant-image/product-variant-image.module.ts)
-- Product variant image service/controller: [src/product-variant-image/product-variant-image.service.ts](src/product-variant-image/product-variant-image.service.ts), [src/product-variant-image/product-variant-image.controller.ts](src/product-variant-image/product-variant-image.controller.ts)
+| Module | Description |
+|--------|-------------|
+| Auth | Register, login, JWT-protected routes, role guards |
+| Products & variants | Catalog with size/color variants, SKU, price, inventory |
+| Categories & sub-categories | Product taxonomy |
+| Sizes & colors | Lookup tables (managed from portal, used by variants) |
+| Cart | Per-user cart with inventory validation |
+| Orders | Create from cart, buyer/seller views, status workflow |
+| Checkout | Stripe session creation, cancel flow, webhook handling |
+| Images | Multipart upload → Cloudinary → `ProductVariantImage` |
 
-## Cloudinary integration
+**Order flow:** Cart → checkout session → Stripe payment → webhook marks `PAID` → seller ships → `DELIVERED`
 
-Images are uploaded to Cloudinary. The project includes a `CloudinaryService` used by image upload endpoints.
+## Getting started
 
-File: [src/cloudinary/cloudinary.service.ts](src/cloudinary/cloudinary.service.ts)
+### Prerequisites
 
-Required environment variables (set in `.env`):
+- Node.js 18+
+- PostgreSQL
+- Stripe account (secret key + webhook secret)
+- Cloudinary account
+
+### Setup
+
+```bash
+git clone https://github.com/rehmaan4584/black_pearl_backend.git
+cd black_pearl_backend
+npm install
+```
+
+Create a `.env` file:
 
 ```env
-DATABASE_URL="postgresql://user:password@localhost:5432/your_db"
+NODE_ENV=development
+PORT=3003
+
+DATABASE_URL=postgresql://user:password@localhost:5432/black_pearl
+
 JWT_SECRET=your_jwt_secret
+
+CORS_ORIGINS=http://localhost:3000,http://localhost:3001
+
 CLOUDINARY_CLOUD_NAME=your_cloud_name
 CLOUDINARY_API_KEY=your_api_key
 CLOUDINARY_API_SECRET=your_api_secret
+
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+STRIPE_SUCCESS_URL=http://localhost:3000/checkout/success
+STRIPE_CANCEL_URL=http://localhost:3000/checkout/cancel
 ```
-
-Common usage:
-
-- Upload image endpoint: typically `POST /product-variants/:id/images` which accepts multipart/form-data and stores the returned Cloudinary `secure_url` in `ProductVariantImage.url`.
-- Services call the Cloudinary client via the `CloudinaryService` to upload and to optionally delete images.
-
-## Prisma schema changes & migrations
-
-The `prisma/schema.prisma` contains the new `ProductVariant` and `ProductVariantImage` models. After pulling changes or modifying the schema locally:
-
-```bash
-npx prisma migrate dev --name add-product-variant-and-images
-npx prisma generate
-```
-
-Migrations are stored in `prisma/migrations/`.
-
-If you need to examine the generated Prisma client, look in `src/generated/prisma`.
-
-## API examples
-
-- Create a product variant (example): `POST /products/:productId/variants` with body `{ "size": "M", "color": "blue", "sku": "SKU123", "price": 49.99 }`.
-- Upload an image for a variant: `POST /product-variants/:variantId/images` (multipart file field `image`). Response includes the stored image record.
-
-See controllers in [src/product-variant](src/product-variant) and [src/product-variant-image](src/product-variant-image) for exact route names and payload shapes.
-
-## Running locally
-
-1. Install dependencies:
-
-```bash
-npm install
-```
-
-2. Set `.env` with required variables (see Cloudinary and DB vars above).
-
-3. Run migrations and generate client:
 
 ```bash
 npx prisma migrate dev
 npx prisma generate
-```
-
-4. Start the app:
-
-```bash
+npm run seed          # optional — seeds sizes & colors
 npm run start:dev
 ```
 
-## Tests & next steps
+API runs on `PORT` (default **3003** in production setup; **3000** if unset).
 
-- Run unit tests: `npm run test`
-- Run end-to-end tests: `npm run test:e2e`
+### Scripts
 
-If you want, I can run tests locally and create a commit for the README changes.
+| Command | Description |
+|---------|-------------|
+| `npm run start:dev` | Dev server with hot reload |
+| `npm run build` | Production build |
+| `npm run start:prod` | Run production build |
+| `npm run seed` | Seed sizes and colors |
+| `npm run test` | Unit tests |
 
----
+## Key API routes
 
-Author: Black Pearl team
-# Black Pearl Backend
+| Area | Routes |
+|------|--------|
+| Auth | `POST /auth/register`, `POST /auth/login`, `GET /auth/me` |
+| Products | `GET /products`, `POST /products/create` (seller) |
+| Variants & images | `POST /product-variant/create`, `POST /product-variant-image/create` |
+| Catalog data | `GET /categories`, `/sub-categories`, `/sizes`, `/colors` |
+| Cart | `GET /cart`, `POST /cart/items`, `PATCH/DELETE /cart/items/:id` |
+| Orders | `POST /orders`, `GET /orders/my`, `PATCH /orders/:id/status` (seller) |
+| Checkout | `POST /checkout/session`, `POST /checkout/cancel`, `POST /checkout/webhook` |
 
-A NestJS backend application with PostgreSQL database integration using Prisma ORM.
+Full route list and request schemas: **Swagger UI** at `/api`.
 
-## Overview
+## Database
 
-This project is built with:
-- **Framework**: NestJS (Node.js framework for building efficient, reliable server-side applications)
-- **Database**: PostgreSQL
-- **ORM**: Prisma (next-generation ORM with type safety)
-- **Database Adapter**: Prisma Adapter for PostgreSQL (`@prisma/adapter-pg`)
+Prisma schema: `prisma/schema.prisma`
 
-## Prerequisites
+Main models: `User`, `Product`, `ProductVariant`, `ProductVariantImage`, `Category`, `SubCategory`, `Size`, `Color`, `Inventory`, `Cart`, `CartItem`, `Order`, `OrderItem`.
 
-- Node.js (v18 or higher recommended)
-- npm or yarn package manager
-- PostgreSQL (v18 or higher)
+## Related repos
 
-## Installation
-
-1. **Clone the repository** and navigate to the project directory:
-```bash
-cd black_pearl_backend
-```
-
-2. **Install dependencies**:
-```bash
-npm install
-```
-
-3. **Set up environment variables**:
-Create a `.env` file in the root directory with the following configuration:
-```
-DATABASE_URL="postgresql://user:password@localhost:5432/zivorr_db"
-```
-
-Replace `user`, `password`, and `zivorr_db` with your PostgreSQL credentials.
-
-## Database Setup
-
-### Initialize Prisma
-
-The Prisma configuration and schema are already set up in the `prisma/` directory:
-- `schema.prisma` - Database schema definition
-- `migrations/` - Database migration files
-
-### Run Migrations
-
-To apply database migrations:
-```bash
-npx prisma migrate dev
-```
-````markdown
-# Black Pearl Backend
-
-A NestJS backend application with PostgreSQL database integration using Prisma ORM.
-
-## Overview
-
-This project is built with:
-- **Framework**: NestJS (Node.js framework for building efficient, reliable server-side applications)
-- **Database**: PostgreSQL
-- **ORM**: Prisma (next-generation ORM with type safety)
-- **Database Adapter**: Prisma Adapter for PostgreSQL (`@prisma/adapter-pg`)
-
-## Prerequisites
-
-- Node.js (v18 or higher recommended)
-- npm or yarn package manager
-- PostgreSQL (v12 or higher)
-
-## Installation
-
-1. **Clone the repository** and navigate to the project directory:
-```bash
-cd black_pearl_backend
-```
-
-2. **Install dependencies**:
-```bash
-npm install
-```
-
-3. **Set up environment variables**:
-Create a `.env` file in the root directory with the following configuration:
-```
-DATABASE_URL="postgresql://user:password@localhost:5432/zivorr_db"
-```
-
-Replace `user`, `password`, and `zivorr_db` with your PostgreSQL credentials.
-
-## Prisma schema (summary)
-
-This project includes a Prisma schema at `prisma/schema.prisma`. Key points from the current schema:
-
-- **Generator**:
-    - `provider = "prisma-client"`
-    - `output = "../src/generated/prisma"` (client is generated into `src/generated/prisma`)
-    - `moduleFormat = "cjs"`
-
-- **Datasource**:
-    - `provider = "postgresql"`
-    - Note: set `DATABASE_URL` in your `.env` (Prisma will use this to connect).
-
-- **Models** (main entities):
-    - `User` — fields: `id`, `name`, `email` (unique), `userType` (enum), `password`, optional contact/address fields, timestamps. Mapped to DB table `users`.
-    - `Product` — fields: `id`, `title`, `description`, `type` (enum), `gender` (enum), `brand` (default `Black Pearl`), timestamps. Mapped to `products`.
-    - `ProductVariant` — variant of a product: `productId` relation, `size` (enum), `color` (enum), `sku` (unique), `price`, an `images` relation to `ProductVariantImage`, optional `inventory`, and timestamps. Mapped to `product_variants`.
-    - `ProductVariantImage` — stores image URLs for a `ProductVariant`: `id`, `url`, `isPrimary` (boolean), optional `sortOrder`, `productVariantId` relation, and timestamps. Mapped to `product_variant_images`.
-    - `Order` — belongs to `User`, links to a `ProductVariant`, has `status` (enum) defaulting to `pending`, timestamps. Mapped to `orders`.
-    - `OrderItem` — belongs to `Order`, references `ProductVariant`, `quantity`, `price`, timestamps. Mapped to `order_items`.
-    - `Inventory` — one-to-one with `ProductVariant` (`productVariantId` is `@unique`), `quantity`, timestamps. Mapped to `inventory`.
-
-- **Enums**:
-    - `ProductGender`: `men`, `women`, `unisex`
-    - `ProductTypes`: `jeans`, `shorts`
-    - `ProductVariantSizes`: `S`, `M`, `L`, `XL`, `XXL`
-    - `ProductVariantColors`: `black`, `blue`, `darkBlue`, `lightBlue`
-    - `OrderStatus`: `pending`, `paid`, `shipped`, `delivered`, `cancelled`
-
-    - `UserTypes`: `buyer`, `seller`
-
-These models include relations (foreign keys) and mapping to specific table names using `@@map`.
-
-## Database Setup
-
-### Run Migrations
-
-To apply database migrations (creates/updates tables according to `prisma/migrations`):
-```bash
-npx prisma migrate dev
-```
-
-If you add or change models, create a named migration:
-```bash
-npx prisma migrate dev --name add-foo
-```
-
-### Generate Prisma client
-
-After schema changes (or after pulling the repo), run:
-```bash
-npx prisma generate
-```
-
-## Key Dependencies
-
-### Database & ORM
-- **@prisma/client** (^7.1.0) - Prisma ORM client for database operations
-- **@prisma/adapter-pg** (^7.1.0) - PostgreSQL adapter for Prisma with native driver support
-- **pg** (^8.16.3) - PostgreSQL client library
-
-### NestJS Core
-- **@nestjs/common** (^11.0.1) - Common NestJS utilities
-- **@nestjs/core** (^11.0.1) - Core NestJS framework
-- **@nestjs/platform-express** (^11.0.1) - Express adapter for NestJS
-- **@nestjs/config** (^4.0.2) - Configuration management for environment variables
-
-### Development Tools
-- **prisma** (^7.1.0) - Prisma CLI for migrations and schema management
-- **@types/pg** (^8.15.6) - TypeScript types for PostgreSQL client
-- **typescript** (^5.7.3) - TypeScript compiler
-- **ts-node** (^10.9.2) - TypeScript execution for Node.js
-
-## Authentication
-
-- **Module**: `src/auth` — provides registration, login and protected endpoints using Passport + NestJS.
-- **Strategies**: `LocalStrategy` (`src/auth/strategy/auth-local.strategy.ts`) for username/email+password login (uses `passport-local`), and `JwtStrategy` (`src/auth/strategy/jwt-auth.strategy.ts`) for bearer token validation (uses `passport-jwt`).
-- **Guards**: `LocalAuthGuard` (`src/auth/guards/local-auth.guard.ts`) wraps the local strategy; `JwtAuthGuard` (`src/auth/guards/jwt-auth.guard.ts`) wraps the JWT strategy; `RolesGuard` (`src/auth/guards/roles.guard.ts`) enforces role-based access using metadata from the `@Roles()` decorator.
-- **Decorator**: `@Roles(...)` (`src/auth/decorators/roles.decorator.ts`) sets required roles on controllers/handlers using the `ROLES_KEY` metadata key.
-- **Usage**: login route uses `@UseGuards(LocalAuthGuard)` (see `POST /auth/login`) which delegates to `AuthService.validate`. Protected routes combine `@UseGuards(JwtAuthGuard, RolesGuard)` and `@Roles('SELLER')` (e.g. `GET /auth/me`) to require a valid JWT and a specific role.
-- **JWT config**: the application reads the JWT secret from the environment variable `JWT_SECRET` via the `ConfigModule` (see `src/config/app.config.ts`). The `JwtModule` is registered with `ConfigService` so `secret` and `expiresIn` come from configuration (default `expiresIn: '1h'`). Do not keep secrets hard-coded in source — set `JWT_SECRET` in your `.env` for production.
-
-## Available Scripts
-
-```bash
-# Development
-npm run start              # Start the application
-npm run start:dev          # Start with file watching (development mode)
-npm run start:debug        # Start with debugger attached
-npm run start:prod         # Production start
-
-# Building
-npm run build              # Build the application for production
-
-# Code Quality
-npm run format             # Format code with Prettier
-npm run lint               # Lint and fix code with ESLint
-
-# Testing
-npm run test               # Run unit tests
-npm run test:watch         # Run tests in watch mode
-npm run test:cov           # Run tests with coverage report
-npm run test:debug         # Debug tests
-npm run test:e2e           # Run end-to-end tests
-```
-
-## Project Structure
-
-```
-src/
-├── app.module.ts              # Root application module
-├── main.ts                    # Application entry point
-├── prisma.service.ts          # Prisma service for database operations
-└── generated/                 # Auto-generated Prisma types and client
-        └── prisma/
-                ├── client.ts          # Generated Prisma client
-                ├── models.ts          # Generated database models
-                └── enums.ts           # Generated enums
-
-prisma/
-├── schema.prisma              # Database schema definition
-└── migrations/                # Database migration history
-
-test/
-├── app.e2e-spec.ts           # End-to-end tests
-└── jest-e2e.json             # E2E test configuration
-```
-
-## Database Connection
-
-The application uses Prisma with a PostgreSQL adapter that leverages the native `pg` driver for improved performance. The connection is managed through the `PrismaService` class (`src/prisma.service.ts`):
-
-```typescript
-// Connection is automatically initialized when the module loads
-// Database URL is read from DATABASE_URL environment variable
-// Connection is gracefully closed when the application shuts down
-```
-
-## Development Workflow
-
-1. **Make schema changes**: Update `prisma/schema.prisma`
-2. **Create migration**: `npx prisma migrate dev --name <migration_name>`
-3. **Generate client**: `npx prisma generate` (auto-run with migrate dev)
-4. **Code changes**: Update your services and controllers
-5. **Run tests**: `npm run test` or `npm run test:watch`
-6. **Start dev server**: `npm run start:dev`
-
-## Troubleshooting
-
-### Database Connection Issues
-- Ensure PostgreSQL is running and accessible
-- Verify `DATABASE_URL` environment variable is correctly set
-- Check PostgreSQL credentials and connection string
-
-### Prisma Generation Issues
-- Delete `node_modules/.prisma` folder
-- Run `npm install` again
-- Execute `npx prisma generate`
-
-### TypeScript Errors
-- Run `npm run build` to check compilation
-- Ensure all generated types are up to date: `npx prisma generate`
+- [black_pearl_store_frontend](https://github.com/rehmaan4584/black_pearl_store_frontend) — Customer storefront (Next.js, Stripe checkout) · [Live](https://rehman-bp-store.duckdns.org)
+- [black_pearl_portal_frontend](https://github.com/rehmaan4584/black_pearl_portal_frontend) — Seller admin panel · [Live](https://rehman-bp-portal.duckdns.org)
 
 ## Author
 
-[Abdul Rehman]
-
-````
+Abdul Rehman
